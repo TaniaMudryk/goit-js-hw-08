@@ -3,30 +3,28 @@ import 'simplelightbox/dist/simple-lightbox.min.css';
 // Add imports above this line
 import { galleryItems } from './gallery-items';
 // Change code below this line
+const galleryPictures = document.querySelector('.gallery');
 
+galleryPictures.innerHTML = galleryItems
+  .map(({preview, original, description}) => {
+    return `
+    <div class = "gallery__item">
+    <a class = "gallery__link" href= "${original}">
+    <img  
+    class = "gallery__image" 
+    data-source = "${original}" 
+    src = ${preview} 
+    alt = "${description}">
+    </a>
+    </div>
+    `;
+  })
+  .join('');
 
-const galeryInsertionPoint = document.querySelector('.gallery');
-
-
-const InsertionContent = createGalleryCardsMarkup(galleryItems);
-galeryInsertionPoint.insertAdjacentHTML('afterbegin', InsertionContent);
-
-let gallery = new SimpleLightbox('.gallery a', {
-  captions: true,
+const lightbox = new SimpleLightbox('.gallery a', {
+  captionsPosition: 'bottom',
   captionsData: 'alt',
   captionDelay: 250,
 });
 
-
-function createGalleryCardsMarkup(el) {
-  return el
-    .map(({ preview, original, description }) => {
-      return `
-      <a class="gallery__item" href="${original}" onclick = "event.preventDefault()">
-      <img class="gallery__image" src="${preview}" alt="${description}" />
-    </a>
-      `;
-    })
-    .join('');
-}
 console.log(galleryItems);
