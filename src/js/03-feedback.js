@@ -1,31 +1,41 @@
 import throttle from 'lodash.throttle';
-
-const form = document.querySelector('.feedback-form');
-form.addEventListener('input', throttle(onFormData, 500));
-form.addEventListener('submit', onSubmitForm);
-
+const formEl = document.querySelector('.feedback-form');
+console.log(formEl);
+const STORAGE_KEY = 'feedback-form-state';
 const formData = {};
 
-function onFormData(event) {
-  formData[event.target.name] = event.target.value;
-  localStorage.setItem('feedback-form-state', JSON.stringify(formData));
+updateForm();
+
+formEl.addEventListener('input', throttle(onFormInput, 500));
+formEl.addEventListener('submit', onFormSubmit);
+
+function onFormInput(e) {
+  formData[e.target.name] = e.target.value;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+  console.log(formData);
 }
 
-function onSubmitForm(event) {
-  console.log(JSON.parse(localStorage.getItem('feedback-form-state')));
-  event.preventDefault();
-  event.currentTarget.reset();
-  localStorage.removeItem('feedback-form-state');
-}
+function onFormSubmit(e) {
+  e.preventDefault();
+  const {
+    elements: { email, message },
+  } = e.target;
 
-function dataFromLocalStorage() {
-  const data = JSON.parse(localStorage.getItem('feedback-form-state'));
-  const email = document.querySelector('.feedback-form input');
-  const message = document.querySelector('.feedback-form textarea');
-  if (data) {
-    email.value = data.email;
-    message.value = data.message;
+  if (email.value === '' || message.value === '') {
+    return window.alert('Please fill in all the fields!');
   }
+  console.log({ Email: email.value, Message: message.value });
+  formEl.reset();
+  localStorage.removeItem(STORAGE_KEY);
 }
 
-dataFromLocalStorage();
+function updateForm() {
+  if (localStorage.getItem(STORAGE_KEY) === null) {
+    return;
+  }
+  const savedForm = JSON.parse(localStorage.getItem(STORAGE_KEY));
+  Object.entries(savedForm).forEach(([name, value]) => {
+    formData[name] = value;
+    formEl.elements[name].value = value;
+  });
+}
